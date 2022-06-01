@@ -15,14 +15,18 @@ from sklearn.ensemble import RandomForestRegressor
 from xgboost.sklearn import XGBRegressor
 from sklearn.model_selection import GridSearchCV
 import math
+from Preprocess import Preprocess
 
 
 def startML():
     WB = pd.read_csv("WB.csv")
     WWB = pd.read_csv('WWB.csv')
 
-    
+    pre = Preprocess(WB)
+    X,x1 = pre.SplitPcaScale(WB)
 
+    print(pd.DataFrame(X).info())
+    print(pd.DataFrame(x1).info())
 
 if __name__ == '__main__':
     startML()
