@@ -1,8 +1,6 @@
 #Preprocess step include
 # Train test split (20%)
 # Standard Scaling
-import this
-
 import numpy as np
 from matplotlib import pyplot as plt
 from sklearn.decomposition import PCA
