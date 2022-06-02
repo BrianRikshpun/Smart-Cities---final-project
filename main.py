@@ -19,16 +19,14 @@ from Preprocess import Preprocess
 
 
 def startML():
-    WB = pd.read_csv("WB.csv")
-    WWB = pd.read_csv('WWB.csv')
+    WB = pd.read_csv("WB.csv") #Water data
+    WWB = pd.read_csv('WWB.csv') #Water and weather data
 
-    pre = Preprocess(WB)
-    X_train, X_test, y_train, y_test = pre.SplitPcaScale(WB)
+    pre_WB = Preprocess(WB)
+    X_train_WB, X_test_WB, y_train_WB, y_test_WB = pre_WB.SplitPcaScale(WB)
 
-    print(pd.DataFrame(X_train).info())
-    print(pd.DataFrame(X_test).info())
-    print(pd.DataFrame(y_train).info())
-    print(pd.DataFrame(y_test).info())
+    pre_WWB = Preprocess(WWB)
+    X_train_WWB, X_test_WWB, y_train_WWB, y_test_WWB = pre_WWB.SplitPcaScale(WWB)
 
 if __name__ == '__main__':
     startML()
