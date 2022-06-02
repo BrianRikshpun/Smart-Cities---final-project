@@ -23,10 +23,12 @@ def startML():
     WWB = pd.read_csv('WWB.csv')
 
     pre = Preprocess(WB)
-    X,x1 = pre.SplitPcaScale(WB)
+    X_train, X_test, y_train, y_test = pre.SplitPcaScale(WB)
 
-    print(pd.DataFrame(X).info())
-    print(pd.DataFrame(x1).info())
+    print(pd.DataFrame(X_train).info())
+    print(pd.DataFrame(X_test).info())
+    print(pd.DataFrame(y_train).info())
+    print(pd.DataFrame(y_test).info())
 
 if __name__ == '__main__':
     startML()

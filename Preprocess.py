@@ -64,7 +64,7 @@ class Preprocess:
         X_train_scaled = self.CheckPCA(X_train_scaled)
         X_test_scaled = self.CheckPCA(X_test_scaled)
 
-        return X_train_scaled, X_test_scaled
+        return X_train_scaled, X_test_scaled, y_train, y_test
 
 
 
