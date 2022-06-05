@@ -1,5 +1,8 @@
 import pandas as pd
+from matplotlib import pyplot as plt
+
 from Preprocess import Preprocess
+from ClassicModels import ClassicModels
 from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
@@ -23,12 +26,22 @@ def startML():
 
 
 
-
     pre_WB = Preprocess(WB)
     X_train_WB, X_test_WB, y_train_WB, y_test_WB = pre_WB.SplitPcaScale(WB)
 
     pre_WWB = Preprocess(WWB)
     X_train_WWB, X_test_WWB, y_train_WWB, y_test_WWB = pre_WWB.SplitPcaScale(WWB)
+
+
+    res_data = ClassicModels(pre_WB)
+    x_for_plot = ["LogisticRegression", "GaussianNB", "KNeighborsClassifier", "DecisionTreeClassifier", "RandomForestClassifier"]
+    y_for_plot = res_data[0]
+
+    plt.bar(x_for_plot, y_for_plot, width=0.4)
+    plt.xlabel("Model")
+    plt.ylabel("AUC")
+    plt.title("AUC for each model - TEST")
+    plt.show()
 
 
 if __name__ == '__main__':

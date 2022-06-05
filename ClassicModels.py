@@ -48,7 +48,7 @@ class ClassicModels:
             scores_test.append(auc)
             best_models.append(clf)
 
-            print("Best parameters set found on development set:")
+            print("Best parameters set found on development set: " , model[m])
             print()
             print(clf.best_params_)
             print()
