@@ -32,17 +32,18 @@ class ClassicModels:
             y_pred = y_hat
             y_true = y_test
 
-            plt.bar(x, y_pred, width=0.4)
-            plt.xlabel("x")
-            plt.ylabel("Total rain")
-            plt.title("results for model %f - Prediction" % (m))
-            plt.show()
-
-            plt.bar(x, y_pred, width=0.4)
-            plt.xlabel("x")
-            plt.ylabel("Total rain")
-            plt.title("results for model %f - True values" % (m))
-            plt.show()
+            #
+            # plt.bar(x, y_pred, width=0.4)
+            # plt.xlabel("x")
+            # plt.ylabel("Total rain")
+            # plt.title("results for model %f - Prediction" % (m))
+            # plt.show()
+            #
+            # plt.bar(x, y_pred, width=0.4)
+            # plt.xlabel("x")
+            # plt.ylabel("Total rain")
+            # plt.title("results for model %f - True values" % (m))
+            # plt.show()
 
             scores_test.append(auc)
             best_models.append(clf)
@@ -54,9 +55,9 @@ class ClassicModels:
             print("Grid scores on development set:")
             print()
             means = clf.cv_results_["mean_test_score"]
-            stds = clf.cv_results_["std_test_score"]
-            for mean, std, params in zip(means, stds, clf.cv_results_["params"]):
-                print("%0.3f (+/-%0.03f) for %r" % (mean * -1, std * 2, params))
+            # stds = clf.cv_results_["std_test_score"]
+            # for mean, std, params in zip(means, stds, clf.cv_results_["params"]):
+            #     print("%0.3f (+/-%0.03f) for %r" % (mean * -1, std * 2, params))
 
         res.append(scores_test)
         res.append(best_models)
