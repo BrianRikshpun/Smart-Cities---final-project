@@ -36,7 +36,7 @@ def startML():
     Visualizations = Visualization(res_data)
     Visualizations.ShowAUC(res_data)
     Visualizations.ShowConfussionMatrix(res_data)
-
+    Visualizations.ShowRoc(res_data)
 
 if __name__ == '__main__':
     startML()

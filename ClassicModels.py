@@ -19,6 +19,7 @@ class ClassicModels:
         scores_test = []  # Saving the scores of the test -- 0
         best_models = []  # Saving the fitted best models --1
         conf_matrixs = [] #Saving the confussion matrix --2
+        roc_graph = [] #Saving the ROC graph parameters  --3
 
         for m in range(0, len(model)):
 
@@ -31,10 +32,15 @@ class ClassicModels:
             x = range(len(y_hat))
             y_pred = y_hat
             y_true = y_test
+            y_prob = clf.predict_proba(x_test)[::,1]
+            fpr, tpr, _ = metrics.roc_curve(y_test, y_prob)
+
 
             scores_test.append(auc)
             best_models.append(clf)
             conf_matrixs.append(confusion_matrix(y_true = y_true, y_pred = y_pred))
+            roc_graph.append([fpr,tpr])
+
 
             print("Best parameters set found on development set: " , model[m])
             print()
@@ -50,5 +56,6 @@ class ClassicModels:
             res.append(scores_test)
             res.append(best_models)
             res.append(conf_matrixs)
+            res.append(roc_graph)
 
         return res
