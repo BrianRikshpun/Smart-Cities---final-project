@@ -6,7 +6,6 @@ class Visualization:
        self.res_data = res_data
        self.models = ["LogisticRegression", "KNeighborsClassifier", "DecisionTreeClassifier", "RandomForestClassifier"]
 
-
     def ShowAUC(self, res_data):
 
         x_for_plot = self.models
@@ -23,7 +22,6 @@ class Visualization:
         plt.title("AUC for each model - TEST")
         plt.show()
 
-
     def ShowConfussionMatrix(self, res_data):
 
         for conf_matrix in res_data[2]:
@@ -37,7 +35,6 @@ class Visualization:
             plt.ylabel('Actuals', fontsize=18)
             plt.title('Confusion Matrix', fontsize=18)
             plt.show()
-
 
     def ShowRoc(self, res_data):
         counter = 0

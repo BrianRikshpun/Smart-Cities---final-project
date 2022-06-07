@@ -11,8 +11,15 @@ from sklearn.ensemble import RandomForestClassifier
 
 
 def startML():
-    WB = pd.read_csv("WB.csv") #Water data
+
+    WB = pd.read_csv("WB_0.csv") #Water data
     WWB = pd.read_csv('WWB.csv') #Water and weather data
+
+    print(WB['class'].value_counts())
+    # print(X_train_WB)
+    #
+    # print("y_train_WB")
+    # print(y_train_WB)
 
     #define the models
     models = [LogisticRegression(), KNeighborsClassifier(), DecisionTreeClassifier(), RandomForestClassifier()]
@@ -24,19 +31,22 @@ def startML():
              [{"max_depth": [3, 5],"max_depth": [3, 5 , 7], "criterion": ['gini', 'entropy'], "n_estimators": [50, 70, 100]}]]
 
 
-    pre_WB = Preprocess(WB)
-    X_train_WB, X_test_WB, y_train_WB, y_test_WB = pre_WB.SplitPcaScale(WB)
+    pre_WB = Preprocess()
+    X_train_WB, X_val_WB, X_test_WB, y_train_WB, y_val_WB, y_test_WB = pre_WB.SplitPcaScale(WB)
 
-    pre_WWB = Preprocess(WWB)
-    X_train_WWB, X_test_WWB, y_train_WWB, y_test_WWB = pre_WWB.SplitPcaScale(WWB)
+    X_train_WB, y_train_WB = pre_WB.smote(X_train_WB, y_train_WB)
 
-    ModelsF = ClassicModels(models, space, X_train_WB, X_test_WB, y_train_WB, y_test_WB)
-    res_data = ModelsF.FindBestParams(models, space, X_train_WB, X_test_WB, y_train_WB, y_test_WB)
-
-    Visualizations = Visualization(res_data)
-    Visualizations.ShowAUC(res_data)
-    Visualizations.ShowConfussionMatrix(res_data)
-    Visualizations.ShowRoc(res_data)
+    # pre_WWB = Preprocess(WWB)
+    # X_train_WWB, X_test_WWB, y_train_WWB, y_test_WWB = pre_WWB.SplitPcaScale(WWB)
+    #
+    # ModelsF = ClassicModels(models, space, X_train_WB, X_test_WB, y_train_WB, y_test_WB)
+    # res_data = ModelsF.FindBestParams(models, space, X_train_WB, X_test_WB, y_train_WB, y_test_WB)
+    #
+    # Visualizations = Visualization(res_data)
+    # Visualizations.ShowAUC(res_data)
+    #
+    # Visualizations.ShowConfussionMatrix(res_data)
+    # Visualizations.ShowRoc(res_data)
 
 if __name__ == '__main__':
     startML()
