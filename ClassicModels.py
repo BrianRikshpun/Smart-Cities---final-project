@@ -43,11 +43,11 @@ class ClassicModels:
             roc_graph.append([fpr,tpr])
 
             #plotting the tree
-            if(m == 2):
-                fig = plt.figure(figsize=(25, 20))
-                _ = tree.plot_tree(clf.best_estimator_,
-                                   filled=True)
-                fig.show()
+            # if(m == 2):
+            #     fig = plt.figure(figsize=(25, 20))
+            #     _ = tree.plot_tree(clf.best_estimator_,
+            #                        filled=True)
+            #     fig.show()
 
 
             print("Best parameters set found on development set: " , model[m])
