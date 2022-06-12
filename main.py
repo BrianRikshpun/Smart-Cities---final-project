@@ -13,9 +13,9 @@ from sklearn.ensemble import RandomForestClassifier
 def startML():
 
     WB = pd.read_csv("WB_0.csv") #Water data
-    WWB = pd.read_csv('WWB.csv') #Water and weather data
+    WWB = pd.read_csv('wWB_0.csv') #Water and weather data
 
-    print(WB['class'].value_counts())
+    #print(WB['class'].value_counts())
     # print(X_train_WB)
     #
     # print("y_train_WB")
