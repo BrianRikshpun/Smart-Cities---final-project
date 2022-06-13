@@ -62,7 +62,7 @@ class Preprocess:
         X_scaled = self.CheckPCA(X_scaled)
 
 
-        X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2)
+        X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, stratify=y)
 
         return X_train, X_test, y_train, y_test
 

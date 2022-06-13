@@ -45,17 +45,17 @@ def startML():
     Visualizations.ShowConfussionMatrix(res_data)
     Visualizations.ShowRoc(res_data)
 
-    # pre_WWB = Preprocess(WWB)
-    # X_train_WWB, X_test_WWB, y_train_WWB, y_test_WWB = pre_WWB.SplitPcaScale(WWB)
-    #
-    # ModelsF = ClassicModels(models, space, X_train_WB, X_test_WB, y_train_WB, y_test_WB)
-    # res_data = ModelsF.FindBestParams(models, space, X_train_WB, X_test_WB, y_train_WB, y_test_WB)
-    #
-    # Visualizations = Visualization(res_data)
-    # Visualizations.ShowAUC(res_data)
-    #
-    # Visualizations.ShowConfussionMatrix(res_data)
-    # Visualizations.ShowRoc(res_data)
+    pre_WWB = Preprocess()
+    X_train_WWB, X_test_WWB, y_train_WWB, y_test_WWB = pre_WWB.SplitPcaScale(WWB)
+
+    ModelsF = ClassicModels(models, space, X_train_WWB, X_test_WWB, y_train_WWB, y_test_WWB)
+    res_data = ModelsF.FindBestParams(models, space, X_train_WWB, X_test_WWB, y_train_WWB, y_test_WWB)
+
+    Visualizations = Visualization(res_data)
+    Visualizations.ShowAUC(res_data)
+
+    Visualizations.ShowConfussionMatrix(res_data)
+    Visualizations.ShowRoc(res_data)
 
 if __name__ == '__main__':
     startML()
