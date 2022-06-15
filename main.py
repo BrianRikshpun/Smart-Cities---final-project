@@ -17,12 +17,6 @@ def startML():
     WWB = pd.read_csv('wWB_0.csv') #Water and weather data
     fig_size = (8, 15)
 
-    #print(WB['class'].value_counts())
-    # print(X_train_WB)
-    #
-    # print("y_train_WB")
-    # print(y_train_WB)
-
     #define the models
     models = [LogisticRegression(), KNeighborsClassifier(), DecisionTreeClassifier(), RandomForestClassifier()]
 
@@ -58,10 +52,6 @@ def startML():
     Visualizations2.ShowRoc("WWB")
     plt.show()
 
-    # Visualizations = Visualization(res_data)
-    # Visualizations.ShowAUC(res_data)
-    # Visualizations.ShowConfussionMatrix(res_data)
-    # Visualizations.ShowRoc(res_data)
 
 if __name__ == '__main__':
     startML()
