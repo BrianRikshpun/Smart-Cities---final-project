@@ -1,16 +1,7 @@
-# import numpy as np
-# import pandas as pd
-# import seaborn as sns
-# import matplotlib.pyplot as plt
-#
-# import torch.optim as optim
-# from sklearn.metrics import confusion_matrix, classification_report
-# import torch.nn as nn
 import torch
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader, Dataset
-# from Data_Loader import TrainData, TestData
 
 
 ## train data
