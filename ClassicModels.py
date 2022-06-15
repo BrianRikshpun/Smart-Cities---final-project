@@ -2,8 +2,6 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import mean_squared_error, confusion_matrix
 from sklearn.model_selection import GridSearchCV
 from sklearn import metrics
-from sklearn import tree
-from sklearn.metrics import balanced_accuracy_score
 
 
 class ClassicModels:
@@ -29,8 +27,7 @@ class ClassicModels:
             clf.fit(x_train, y_train)
 
             y_hat = clf.predict(x_test)
-            auc = balanced_accuracy_score(y_test, y_hat)
-            #auc = metrics.roc_auc_score(y_test, y_hat)
+            auc = metrics.roc_auc_score(y_test, y_hat)
 
             x = range(len(y_hat))
             y_pred = y_hat
@@ -43,13 +40,6 @@ class ClassicModels:
             best_models.append(clf)
             conf_matrixs.append(confusion_matrix(y_true = y_true, y_pred = y_pred))
             roc_graph.append([fpr,tpr])
-
-            #plotting the tree
-            # if(m == 2):
-            #     fig = plt.figure(figsize=(25, 20))
-            #     _ = tree.plot_tree(clf.best_estimator_,
-            #                        filled=True)
-            #     fig.show()
 
 
             print("Best parameters set found on development set: " , model[m])
