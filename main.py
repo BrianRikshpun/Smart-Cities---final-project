@@ -15,7 +15,7 @@ def startML():
     WB = pd.read_csv("WB_0.csv") #Water data
 
     WWB = pd.read_csv('wWB_0.csv') #Water and weather data
-    fig_size = (8, 15)
+    fig_size = (10, 8)
 
     #define the models
     models = [LogisticRegression(), KNeighborsClassifier(), DecisionTreeClassifier(), RandomForestClassifier()]
@@ -28,9 +28,9 @@ def startML():
 
 
     pre_WB = Preprocess()
-
-    X_train_WB, X_test_WB, y_train_WB, y_test_WB = pre_WB.SplitPcaScale(WB, 'WB', fisi=fig_size)
-    X_train_WB, y_train_WB = pre_WB.smote(X_train_WB, y_train_WB)
+    X_train1_WB, X_test_WB, y_train1_WB, y_test_WB = pre_WB.SplitPcaScale(WB, 'WB', fisi=fig_size)
+    X_train_WB, y_train_WB = pre_WB.smote(X_train1_WB, y_train1_WB)
+    pre_WB.plot_2d_space(X_train_WB, y_train_WB, X_train1_WB, y_train1_WB, label='SMOTE', fisi=fig_size)
 
     ModelsF = ClassicModels(models, space, X_train_WB, X_test_WB, y_train_WB, y_test_WB)
     res_data = ModelsF.FindBestParams(models, space, X_train_WB, X_test_WB, y_train_WB, y_test_WB)
@@ -41,7 +41,9 @@ def startML():
     Visualizations1.ShowRoc("WB")
 
     pre_WWB = Preprocess()
-    X_train_WWB, X_test_WWB, y_train_WWB, y_test_WWB = pre_WWB.SplitPcaScale(WWB, 'WWB', fisi=fig_size)
+    X_train1_WWB, X_test_WWB, y_train1_WWB, y_test_WWB = pre_WWB.SplitPcaScale(WWB, 'WWB', fisi=fig_size)
+    X_train_WWB, y_train_WWB = pre_WWB.smote(X_train1_WWB, y_train1_WWB)
+    pre_WWB.plot_2d_space(X_train_WWB, y_train_WWB, X_train1_WWB, y_train1_WWB, label='SMOTE', fisi=fig_size)
 
     ModelsF = ClassicModels(models, space, X_train_WWB, X_test_WWB, y_train_WWB, y_test_WWB)
     res_data = ModelsF.FindBestParams(models, space, X_train_WWB, X_test_WWB, y_train_WWB, y_test_WWB)

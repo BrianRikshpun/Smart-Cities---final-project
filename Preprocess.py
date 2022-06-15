@@ -78,3 +78,26 @@ class Preprocess:
 
         return X_resampled, y_resampled
 
+
+    def plot_2d_space(self, X_train, y_train, X, y, label, fisi):
+        colors = ['#1F77B4', '#FF7F0E']
+        markers = ['o', 's']
+
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=fisi)
+
+        for l, c, m in zip(np.unique(y), colors, markers):
+            ax1.scatter(
+                X_train[y_train == l, 0],
+                X_train[y_train == l, 1],
+                c=c, label=l, marker=m
+            )
+        for l, c, m in zip(np.unique(y), colors, markers):
+            ax2.scatter(
+                X[y == l, 0],
+                X[y == l, 1],
+                c=c, label=l, marker=m
+            )
+
+        ax1.set_title(label)
+        ax2.set_title('original data')
+        plt.legend(loc='upper right')
