@@ -3,6 +3,7 @@ from sklearn.metrics import mean_squared_error, confusion_matrix
 from sklearn.model_selection import GridSearchCV
 from sklearn import metrics
 from sklearn import tree
+from sklearn.metrics import balanced_accuracy_score
 
 
 class ClassicModels:
@@ -28,7 +29,8 @@ class ClassicModels:
             clf.fit(x_train, y_train)
 
             y_hat = clf.predict(x_test)
-            auc = metrics.roc_auc_score(y_test, y_hat)
+            auc = balanced_accuracy_score(y_test, y_hat)
+            #auc = metrics.roc_auc_score(y_test, y_hat)
 
             x = range(len(y_hat))
             y_pred = y_hat
