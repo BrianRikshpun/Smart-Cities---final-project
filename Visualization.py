@@ -34,23 +34,6 @@ class Visualization:
             c += 1
         plt.tight_layout()
 
-    def ShowConfussionMatrix(self, data):
-
-        plt.figure(self.figsiz)
-        c = 0
-        for conf_matrix in self.res_data[2]:
-            c += 1
-            fig, ax = plt.subplots(figsize=self.figsiz)
-            ax.matshow(conf_matrix, cmap=plt.cm.Blues, alpha=0.3)
-            for i in range(conf_matrix.shape[0]):
-                for j in range(conf_matrix.shape[1]):
-                    ax.text(x=j, y=i, s=conf_matrix[i, j], va='center', ha='center', size='xx-large')
-
-            plt.xlabel('Predictions', fontsize=18)
-            plt.ylabel('Actuals', fontsize=18)
-            plt.title(f'Confusion Matrix - {data}', fontsize=18)
-            plt.show()
-
     def ShowRoc(self, data):
         counter = 0
         plt.figure(figsize=self.figsiz)
