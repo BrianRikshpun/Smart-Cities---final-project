@@ -3,23 +3,90 @@ from matplotlib import pyplot as plt
 from Preprocess import Preprocess
 from ClassicModels import ClassicModels
 from Visualization import Visualization
+from Data_Loader import prep_data_loder
+from nn_b_c import set_model
+from LSTM import LSTM_Model
 from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
+import torch
+from sklearn.metrics import confusion_matrix, classification_report
+
+def start_lstm():
+
+    lstm = LSTM_Model(n_steps_in=2, n_steps_out=2)
+    x_trin, x_val, x_test, y_trin, y_val, y_test, n_features = lstm.prep_data()
+    model, optimizers = lstm.load_model(n_features=n_features)
+    lstm.plot_tarin(optimizers=optimizers, model=model, x_trin=x_trin, x_test=x_test, x_val=x_val, y_trin=y_trin, y_test=y_test, y_val=y_val)
+    plt.show()
+
+
+def stat_nn():
+
+    WB = pd.read_csv("WB_0.csv")  # Water data
+    WWB = pd.read_csv('wWB_0.csv')  # Water and weather data
+
+    # hyper-parameters - 2 layers nn
+    EPOCHS = 500
+    BATCH_SIZE = 64
+    LEARNING_RATE = 0.0001
+
+    dl = prep_data_loder()
+    train_loader, test_loader, X_test, y_test = dl.data_loder(WB, BATCH_SIZE)
+
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    sm = set_model()
+    model, criterion, optimizer = set_model.load_model(LEARNING_RATE, device)
+
+    model.train()
+    for e in range(1, EPOCHS + 1):
+        epoch_loss = 0
+        epoch_acc = 0
+        for X_batch, y_batch in train_loader:
+
+            X_batch, y_batch = X_batch.to(device), y_batch.to(device)
+            optimizer.zero_grad()
+            xbs = X_batch.size(dim=0)
+
+            if xbs == BATCH_SIZE:
+                y_pred = model(X_batch)
+
+                loss = criterion(y_pred, y_batch.unsqueeze(1))
+                acc = sm.binary_acc(y_pred, y_batch.unsqueeze(1))
+
+                loss.backward()
+                optimizer.step()
+
+                epoch_loss += loss.item()
+                epoch_acc += acc.item()
+
+        if e % 100 == 0 or e == 1:
+            print(f'Epoch {e + 0:03}: | Loss: {epoch_loss / len(train_loader):.5f} |'
+                  f' Acc: {epoch_acc / len(train_loader):.3f}')
+
+    y_pred_list = []
+    model.eval()
+    # with torch.no_grad():
+    for X_batch in test_loader:
+        X_batch = X_batch.to(device)
+        y_test_pred = model(X_batch)
+        y_test_pred = torch.sigmoid(y_test_pred)
+        y_pred_tag = torch.round(y_test_pred)
+        y_pred_list.append(y_pred_tag.cpu().detach().numpy())
+
+    y_pred_list = [a.squeeze().tolist() for a in y_pred_list]
+    confusion_matrix(y_test, y_pred_list)
+    print(classification_report(y_test, y_pred_list))
 
 
 def startML():
 
     WB = pd.read_csv("WB_0.csv") #Water data
-    WWB = pd.read_csv('WWB.csv') #Water and weather data
 
-    print(WB['class'].value_counts())
-    # print(X_train_WB)
-    #
-    # print("y_train_WB")
-    # print(y_train_WB)
+    WWB = pd.read_csv('wWB_0.csv') #Water and weather data
+    fig_size = (10, 8)
 
     #define the models
     models = [LogisticRegression(), KNeighborsClassifier(), DecisionTreeClassifier(), RandomForestClassifier()]
@@ -32,22 +99,34 @@ def startML():
 
 
     pre_WB = Preprocess()
-    X_train_WB, X_val_WB, X_test_WB, y_train_WB, y_val_WB, y_test_WB = pre_WB.SplitPcaScale(WB)
+    X_train1_WB, X_test_WB, y_train1_WB, y_test_WB = pre_WB.SplitPcaScale(WB, 'WB', fisi=fig_size)
+    X_train_WB, y_train_WB = pre_WB.smote(X_train1_WB, y_train1_WB)
+    pre_WB.plot_2d_space(X_train_WB, y_train_WB, X_train1_WB, y_train1_WB, label='SMOTE', fisi=fig_size)
 
-    X_train_WB, y_train_WB = pre_WB.smote(X_train_WB, y_train_WB)
+    ModelsF = ClassicModels(models, space, X_train_WB, X_test_WB, y_train_WB, y_test_WB)
+    res_data = ModelsF.FindBestParams(models, space, X_train_WB, X_test_WB, y_train_WB, y_test_WB)
 
-    # pre_WWB = Preprocess(WWB)
-    # X_train_WWB, X_test_WWB, y_train_WWB, y_test_WWB = pre_WWB.SplitPcaScale(WWB)
-    #
-    # ModelsF = ClassicModels(models, space, X_train_WB, X_test_WB, y_train_WB, y_test_WB)
-    # res_data = ModelsF.FindBestParams(models, space, X_train_WB, X_test_WB, y_train_WB, y_test_WB)
-    #
-    # Visualizations = Visualization(res_data)
-    # Visualizations.ShowAUC(res_data)
-    #
-    # Visualizations.ShowConfussionMatrix(res_data)
-    # Visualizations.ShowRoc(res_data)
+    Visualizations1 = Visualization(res_data, fig_size)
+    Visualizations1.ShowAUC("WB")
+    Visualizations1.Show_Confussion_Matrix(X_test_WB, y_test_WB)
+    Visualizations1.ShowRoc("WB")
+
+    pre_WWB = Preprocess()
+    X_train1_WWB, X_test_WWB, y_train1_WWB, y_test_WWB = pre_WWB.SplitPcaScale(WWB, 'WWB', fisi=fig_size)
+    X_train_WWB, y_train_WWB = pre_WWB.smote(X_train1_WWB, y_train1_WWB)
+    pre_WWB.plot_2d_space(X_train_WWB, y_train_WWB, X_train1_WWB, y_train1_WWB, label='SMOTE', fisi=fig_size)
+
+    ModelsF = ClassicModels(models, space, X_train_WWB, X_test_WWB, y_train_WWB, y_test_WWB)
+    res_data = ModelsF.FindBestParams(models, space, X_train_WWB, X_test_WWB, y_train_WWB, y_test_WWB)
+
+    Visualizations2 = Visualization(res_data, fig_size)
+    Visualizations2.ShowAUC("WWB")
+    Visualizations2.Show_Confussion_Matrix(X_test_WWB, y_test_WWB)
+    Visualizations2.ShowRoc("WWB")
+    plt.show()
+
 
 if __name__ == '__main__':
-    startML()
-
+    # startML()
+    # stat_nn()
+    start_lstm()
