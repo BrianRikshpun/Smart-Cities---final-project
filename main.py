@@ -82,7 +82,7 @@ def start_lstm():
     epochs = 12
     Precision = []
 
-    df = pd.read_csv('WB_0.csv')
+    df = pd.read_csv('wWB_0.csv')
     ture_bc_test = df['class'].astype(int)
     split = math.floor(df.shape[0] * 0.85)
     ture_bc_test = ture_bc_test[split:]
@@ -103,7 +103,7 @@ def start_lstm():
         for n_steps_in in range(2, n_steps_in_r+1):
             if n_steps_in >= n_steps_out:
                 lstm = LSTM_M(n_steps_in=n_steps_in, n_steps_out=n_steps_out)
-                x_trin, x_val, x_test, y_trin, y_val, y_test, X_tv, y_tv, n_features, scaler_0 = lstm.prep_data()
+                x_trin, x_val, x_test, y_trin, y_val, y_test, X_tv, y_tv, n_features, scaler_0 = lstm.prep_data_WWB()
                 model = lstm.load_model(n_features=n_features)
 
                 # fit network and plot loss
@@ -153,7 +153,7 @@ def start_lstm():
                 df_LSTM_ROC = df_LSTM_ROC.append({'in': n_steps_in, 'out': n_steps_out-1, 'TP': tp, 'FP': fp, 'TN': tn, 'FN': fn}, ignore_index=True)
             else:
                 pass
-    df_LSTM_ROC.to_csv('wb_lstm.csv')
+    df_LSTM_ROC.to_csv('wwb_lstm.csv')
 
     # plt.show()
 
