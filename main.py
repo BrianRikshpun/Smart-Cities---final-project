@@ -20,12 +20,12 @@ from sklearn.metrics import confusion_matrix, classification_report
 def start_lstm_2():
     # Predict Closing Prices using a 10 day window of previous closing prices
     # Then, experiment with window sizes anywhere from 1 to 10 and see how the model performance changes
-    window_size = 14
+    window_size = 15
 
     feature_column = 6
     target_column = 7
-    number_units = 30
-    dropout_fraction = 0.5
+    number_units = 50
+    dropout_fraction = 0.3
     epochs = 10
 
     lstm = LSTM_model()
@@ -45,9 +45,7 @@ def start_lstm_2():
     X_test = X_test.reshape((X_test.shape[0], X_test.shape[1], 1))
 
     model = lstm.model(X_train, number_units, dropout_fraction)
-
     history = model.fit(X_train, y_train, epochs=epochs, shuffle=False, batch_size=1, validation_data=(X_test, y_test), verbose=1)
-
     # Evaluate the model
     model.evaluate(X_test, y_test)
 
@@ -57,7 +55,7 @@ def start_lstm_2():
     predicted_Turbidity = scaler.inverse_transform(predicted)
     real_Turbidity = scaler.inverse_transform(y_test.reshape(-1, 1))
 
-    plt.figure()
+    plt.subplot()
     # Create a DataFrame of Real and Predicted values
     Turbidity = pd.DataFrame({
         "Real": real_Turbidity.ravel(),
@@ -65,6 +63,7 @@ def start_lstm_2():
         index=df.index[-len(real_Turbidity):])
     Turbidity.plot(title="Turbidity Real vs. Predicted", figsize=(10, 5))
 
+    plt.subplot()
     plt.plot(history.history['loss'], label='train')
     plt.plot(history.history['val_loss'], label='test')
     plt.title('model loss adam')

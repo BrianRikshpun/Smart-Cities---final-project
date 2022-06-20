@@ -272,13 +272,13 @@ class LSTM_model:
         df2 = pd.read_csv(csv_path, index_col="Measurement Date", infer_datetime_format=True, parse_dates=True)['Latitude'].sort_index()
         df3 = pd.read_csv(csv_path, index_col="Measurement Date", infer_datetime_format=True, parse_dates=True)['Wave Height'].sort_index()
         df4 = pd.read_csv(csv_path, index_col="Measurement Date", infer_datetime_format=True, parse_dates=True)['Wave Period'].sort_index()
-        df5 = pd.read_csv(csv_path, index_col="Measurement Date", infer_datetime_format=True, parse_dates=True)['Battery Life'].sort_index()
+        df5 = pd.read_csv(csv_path, index_col="Measurement Date", infer_datetime_format=True, parse_dates=True)['Battery Life'].sort_index().astype(int)
         # df6 = pd.read_csv(csv_path, index_col="Measurement Date", infer_datetime_format=True, parse_dates=True)['Measurement Day'].sort_index()
         # df8 = pd.read_csv(csv_path, index_col="Measurement Date", infer_datetime_format=True, parse_dates=True)['Measurement Month'].sort_index()
         # df9 = pd.read_csv(csv_path, index_col="Measurement Date", infer_datetime_format=True, parse_dates=True)['Measurement Year'].sort_index()
-        df10 = pd.read_csv(csv_path, index_col="Measurement Date", infer_datetime_format=True, parse_dates=True)['Measurement Hour'].sort_index()
-        df11 = pd.read_csv(csv_path, index_col="Measurement Date", infer_datetime_format=True, parse_dates=True)['class'].sort_index()
-        df_t = pd.read_csv(csv_path, index_col="Measurement Date", infer_datetime_format=True, parse_dates=True)['Turbidity'].sort_index()
+        df10 = pd.read_csv(csv_path, index_col="Measurement Date", infer_datetime_format=True, parse_dates=True)['Measurement Hour'].sort_index().astype(int)
+        df11 = pd.read_csv(csv_path, index_col="Measurement Date", infer_datetime_format=True, parse_dates=True)['Turbidity'].sort_index().astype(int)
+        df_t = pd.read_csv(csv_path, index_col="Measurement Date", infer_datetime_format=True, parse_dates=True)['class'].sort_index().astype(int)
 
         # Join the data into a single DataFrame
         df = df1.to_frame().join(df2, how="inner")
