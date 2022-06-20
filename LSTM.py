@@ -1,17 +1,17 @@
-import pandas as pd
-import numpy as np
-from numpy import array, hstack
-import tensorflow as tf
+import math
 import torch
+import tensorflow as tf
+import numpy as np
+import pandas as pd
+from pandas import Series
+from numpy import array, hstack
+import matplotlib.pyplot as plt
 from keras.models import Sequential
+from keras.layers import LSTM, Dense, Dropout #, RepeatVector, TimeDistributed
+from sklearn.preprocessing import MinMaxScaler
+from tensorflow.keras.optimizers import Adam #, Adamax, Adadelta, Adagrad, SGD
 # from tensorflow import keras
 # from tensorflow.keras import layers
-from keras.layers import LSTM, Dense, RepeatVector, TimeDistributed, Dropout
-import matplotlib.pyplot as plt
-import math
-from sklearn.preprocessing import MinMaxScaler
-from pandas import Series
-from tensorflow.keras.optimizers import SGD, Adam, Adamax, Adadelta, Adagrad
 
 
 class LSTM_M:
@@ -19,61 +19,12 @@ class LSTM_M:
         self.n_steps_in = n_steps_in
         self.n_steps_out = n_steps_out
 
-    def load_model(self, n_features):
-        model = Sequential()
-        model.add(LSTM(50, activation='relu', recurrent_activation='sigmoid', return_sequences=True, input_shape=(self.n_steps_in, n_features)))
-        model.add(LSTM(50, activation='relu', recurrent_activation='sigmoid', ))
-        model.add(Dense(self.n_steps_out))
-        # model.add(Dense(1)) ## one output
-
-        # model = Sequential()
-        # model.add(LSTM(100, activation='relu', input_shape=(self.n_steps_in, n_features)))
-        # model.add(RepeatVector(self.n_steps_out))
-        # model.add(LSTM(100, activation='relu', return_sequences=True))
-        # model.add(TimeDistributed(Dense(1)))
-
-        optimizers = tf.keras.optimizers.Adam(learning_rate=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-07)
-        # tf.keras.optimizers.Adagrad(learning_rate=0.001, initial_accumulator_value=0.1, epsilon=1e-07),
-        # tf.keras.optimizers.Adamax(learning_rate=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-07),
-        # tf.keras.optimizers.Adadelta(learning_rate=0.001, rho=0.95, epsilon=1e-07)]
-        # tf.keras.optimizers.SGD(learning_rate=0.001, momentum=0.05, nesterov=False)]
-
-        return model, optimizers
-
-    def plot_tarin(self, optimizers, model, x_trin, x_test, x_val, y_trin, y_test, y_val):
-        op = ['adam']  #, 'adagrad', 'adamax', 'adadelta' , 'sgd']
-        i = 0
-        for optimizer in optimizers:
-            model.compile(optimizer=optimizer, loss='mean_squared_error', metrics=['accuracy', 'mse'])
-            # fit network
-            history = model.fit(x_trin, y_trin, epochs=10, batch_size=7, validation_data=(x_test, y_test), verbose=0, shuffle=False)
-            model.evaluate(x_val, y_val, batch_size=7, return_dict=True)
-            # summarize history for loss
-            plt.figure()
-            plt.plot(history.history['loss'], label='train')
-            plt.plot(history.history['val_loss'], label='test')
-            plt.title(f'model loss {op[i]}')
-            plt.ylabel('loss')
-            plt.xlabel('epoch')
-            plt.legend()
-            i += 1
-
-
-
-    def binary_acc(self, y_pred, y_test):
-        y_pred_tag = torch.round(torch.sigmoid(y_pred))
-
-        correct_results_sum = (y_pred_tag == y_test).sum().float()
-        acc = correct_results_sum / y_test.shape[0]
-        acc = torch.round(acc * 100)
-
-        return acc
-
     def prep_data(self):
         X = pd.read_csv('WB_0.csv')
         X_temp = X.pop('Turbidity')
         X['Turbidity'] = X_temp
         X.pop('Measurement Date')
+
         # define input sequence
         in_seq1 = X['Water Temperature'].to_numpy()
         in_seq2 = X['Wave Height'].to_numpy()
@@ -181,13 +132,12 @@ class LSTM_M:
         dataset = hstack((in_seq1, in_seq2, in_seq3, in_seq4, in_seq5, in_seq6, in_seq7, in_seq8, in_seq9, in_seq10, out_seq))
         # covert into input/output
         x_trin, x_val, x_test, y_trin, y_val, y_test, X_tv, y_tv = self.split_sequences(dataset, self.n_steps_in, self.n_steps_out)
-        # the dataset knows the number of features, e.g. 2
-        n_features = x_trin.shape[2]
 
+        # the dataset knows the number of features
+        n_features = x_trin.shape[2]
 
         return x_trin, x_val, x_test, y_trin, y_val, y_test, X_tv, y_tv, n_features, scaler_0
 
-    # split a multivariate sequence into samples
     def split_sequences(self, sequences, n_steps_in, n_steps_out):
         X, y = list(), list()
         for i in range(len(sequences)):
@@ -215,6 +165,48 @@ class LSTM_M:
         y_tv = y[:s]
 
         return x_trin, x_val, x_test, y_trin, y_val, y_test, X_tv, y_tv
+
+    def load_model(self, n_features):
+        model = Sequential()
+        model.add(LSTM(50, activation='relu', recurrent_activation='sigmoid', return_sequences=True,
+                       nput_shape=(self.n_steps_in, n_features)))
+        model.add(LSTM(50, activation='relu', recurrent_activation='sigmoid'))
+        model.add(Dense(self.n_steps_out))
+        # model.add(Dense(1)) ## one output
+        # model = Sequential()
+        # model.add(LSTM(100, activation='relu', input_shape=(self.n_steps_in, n_features)))
+        # model.add(RepeatVector(self.n_steps_out))
+        # model.add(LSTM(100, activation='relu', return_sequences=True))
+        # model.add(TimeDistributed(Dense(1)))
+
+        optimizers = tf.keras.optimizers.Adam(learning_rate=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-07)
+        # tf.keras.optimizers.Adagrad(learning_rate=0.001, initial_accumulator_value=0.1, epsilon=1e-07),
+        # tf.keras.optimizers.Adamax(learning_rate=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-07),
+        # tf.keras.optimizers.Adadelta(learning_rate=0.001, rho=0.95, epsilon=1e-07)]
+        # tf.keras.optimizers.SGD(learning_rate=0.001, momentum=0.05, nesterov=False)]
+
+        model.compile(optimizer=optimizers, loss='mean_squared_error', metrics=['accuracy', 'mse'])
+
+        return model
+
+    def plot_tarin(self, model, x_trin, x_test, x_val, y_trin, y_test, y_val, epochs):
+        op = ['adam']  #, 'adagrad', 'adamax', 'adadelta' , 'sgd']
+
+        # fit network
+        history = model.fit(x_trin, y_trin, epochs=epochs, batch_size=1,
+                            validation_data=(x_test, y_test), verbose=0, shuffle=False)
+
+        model.evaluate(x_val, y_val, batch_size=1, return_dict=True)
+        # summarize history for loss
+        plt.figure()
+        plt.plot(history.history['loss'], label='train')
+        plt.plot(history.history['val_loss'], label='test')
+        plt.title(f'model loss {op}')
+        plt.ylabel('loss')
+        plt.xlabel('epoch')
+        plt.legend()
+
+        return model
 
 
 class LSTM_model:
@@ -277,8 +269,8 @@ class LSTM_model:
         # df8 = pd.read_csv(csv_path, index_col="Measurement Date", infer_datetime_format=True, parse_dates=True)['Measurement Month'].sort_index()
         # df9 = pd.read_csv(csv_path, index_col="Measurement Date", infer_datetime_format=True, parse_dates=True)['Measurement Year'].sort_index()
         df10 = pd.read_csv(csv_path, index_col="Measurement Date", infer_datetime_format=True, parse_dates=True)['Measurement Hour'].sort_index().astype(int)
-        df11 = pd.read_csv(csv_path, index_col="Measurement Date", infer_datetime_format=True, parse_dates=True)['Turbidity'].sort_index().astype(int)
-        df_t = pd.read_csv(csv_path, index_col="Measurement Date", infer_datetime_format=True, parse_dates=True)['class'].sort_index().astype(int)
+        df11 = pd.read_csv(csv_path, index_col="Measurement Date", infer_datetime_format=True, parse_dates=True)['class'].sort_index().astype(int)
+        df_t = pd.read_csv(csv_path, index_col="Measurement Date", infer_datetime_format=True, parse_dates=True)['Turbidity'].sort_index().astype(int)
 
         # Join the data into a single DataFrame
         df = df1.to_frame().join(df2, how="inner")

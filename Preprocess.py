@@ -70,11 +70,7 @@ class Preprocess:
     def smote(self, x_train, y_train):
 
         sm = SMOTE(k_neighbors=8, random_state=42)
-
         X_resampled, y_resampled = sm.fit_resample(x_train, y_train)
-
-        # X_resampled['class'] = y_resampled
-        #x = pd.DataFrame(X_resampled)
 
         return X_resampled, y_resampled
 

@@ -20,7 +20,7 @@ from sklearn.metrics import confusion_matrix, classification_report
 def start_lstm_2():
     # Predict Closing Prices using a 10 day window of previous closing prices
     # Then, experiment with window sizes anywhere from 1 to 10 and see how the model performance changes
-    window_size = 15
+    window_size = 19
 
     feature_column = 6
     target_column = 7
@@ -62,6 +62,7 @@ def start_lstm_2():
         "Predicted": predicted_Turbidity.ravel()},
         index=df.index[-len(real_Turbidity):])
     Turbidity.plot(title="Turbidity Real vs. Predicted", figsize=(10, 5))
+    plt.show()
 
     plt.subplot()
     plt.plot(history.history['loss'], label='train')
@@ -74,64 +75,47 @@ def start_lstm_2():
     plt.show()
 
 
-def start_lstm_1():
+def start_lstm():
 
-    n_steps_in_r = 8
-    n_steps_out_r = 5
-    epochs = 10
-    hh = []
-    prec = []
+    n_steps_in_r = 30
+    n_steps_out_r = 14
+    epochs = 12
+    Precision = []
+
     df = pd.read_csv('WB_0.csv')
-    ture_t = df['class'].astype(int)
-    s = math.floor(df.shape[0] * 0.85)
-    ture_t = ture_t[s:]
-    ddf = pd.DataFrame()
+    ture_bc_test = df['class'].astype(int)
+    split = math.floor(df.shape[0] * 0.85)
+    ture_bc_test = ture_bc_test[split:]
+    df_LSTM_ROC = pd.DataFrame()
 
-
-    ttt1 = 0
-    ttt0 = 0
-    for c in ture_t:
-        # print(c)
-        if c == 1:
-            ttt1 += 1
-        else:
-            ttt0 += 1
-
-    print(ttt1, ttt0, len(ture_t))
+    # ttt1 = 0
+    # ttt0 = 0
+    # for c in ture_bc_test:
+    #     # print(c)
+    #     if c == 1:
+    #         ttt1 += 1
+    #     else:
+    #         ttt0 += 1
+    #
+    # print(ttt1, ttt0, len(ture_bc_test))
 
     for n_steps_out in range(2, n_steps_out_r+1):
         for n_steps_in in range(2, n_steps_in_r+1):
             if n_steps_in >= n_steps_out:
                 lstm = LSTM_M(n_steps_in=n_steps_in, n_steps_out=n_steps_out)
                 x_trin, x_val, x_test, y_trin, y_val, y_test, X_tv, y_tv, n_features, scaler_0 = lstm.prep_data()
-                model, optimizers = lstm.load_model(n_features=n_features)
-                model.compile(optimizer=optimizers, loss='mean_squared_error', metrics=['accuracy', 'mse'])
+                model = lstm.load_model(n_features=n_features)
 
-                # fit network
-
-                history = model.fit(x_trin, y_trin, epochs=epochs, batch_size=1, validation_data=(x_test, y_test), verbose=0, shuffle=False)
-                # history.appenmodel.evaluate(x_val, y_val, batch_size=1, return_dict=True)
+                # fit network and plot loss
+                model = lstm.plot_tarin(model, x_trin, x_test, x_val, y_trin, y_test, y_val, epochs)
 
                 # evaluate network
-                hh.append(history)
-
-                # plt.figure()
-                plt.plot(history.history['loss'], label=f'train {n_steps_in} {n_steps_out-1}')
-                plt.plot(history.history['val_loss'], label=f'test {n_steps_in} {n_steps_out-1}')
-                plt.title(f'model loss adam learn_in: {n_steps_in} ||| predict_out: {n_steps_out-1}')
-                plt.ylabel('loss')
-                plt.xlabel('epoch')
-                plt.legend()
-                plt.tight_layout()
-                # y_pred = model(x_test)
-
+                model.evaluate(x_val, y_val, batch_size=1)
                 yhat = model.predict(x_test, verbose=0)
-                # yhat = model.predict_on_batch(x_test)
-                # print(yhat)
+
                 pre = []
                 for p in yhat:
                     pp = []
-                    # print(p)
                     for i in p:
                         pp.append(scaler_0.inverse_transform(i.reshape(1, -1)).tolist()[0])
                     pre.append(pp)
@@ -142,60 +126,36 @@ def start_lstm_1():
                 fn = 0
                 i = 0
                 for p in pre:
-                    cc = 0
-                    if i < (len(ture_t) - n_steps_out):
-                        if p[n_steps_out-1][0]*2 >= 5 and ture_t.iloc[i+n_steps_out] == 1:
+                    if i < (len(ture_bc_test) - n_steps_out):
+                        if p[n_steps_out-1][0] >= 5 and ture_bc_test.iloc[i+n_steps_out] == 1:
                             tp += 1
-                        if p[n_steps_out-1][0]*2 >= 5 and ture_t.iloc[i+n_steps_out] == 0:
+                        if p[n_steps_out-1][0] >= 5 and ture_bc_test.iloc[i+n_steps_out] == 0:
                             fn += 1
-                        if p[n_steps_out-1][0]*2 < 5 and ture_t.iloc[i+n_steps_out] == 1:
+                        if p[n_steps_out-1][0] < 5 and ture_bc_test.iloc[i+n_steps_out] == 1:
                             fp += 1
-                        if p[n_steps_out-1][0]*2 < 5 and ture_t.iloc[i+n_steps_out] == 0:
+                        if p[n_steps_out-1][0] < 5 and ture_bc_test.iloc[i+n_steps_out] == 0:
                             tn += 1
-                    #
-                    # for pp in p:
-                    #     # print(pp)
-                    #     if i < (len(ture_t) - n_steps_out):
-                    #         if pp[0] >= 5 and ture_t[i: i+n_steps_out].to_numpy()[cc] == 1:
-                    #             tp += 1
-                    #             # print("class 1")
-                    #         if pp[0] >= 5 and ture_t[i: i+n_steps_out].to_numpy()[cc] == 0:
-                    #             fn += 1
-                    #         if pp[0] < 5 and ture_t[i: i+n_steps_out].to_numpy()[cc] == 1:
-                    #             fp += 1
-                    #         if pp[0] < 5 and ture_t[i: i+n_steps_out].to_numpy()[cc] == 0:
-                    #             tn += 1
-                    #     cc+=1
                     i+=1
 
                 # print('------------------------')
                 if tp == 0 and fn == 0 or tp == 0 and fp == 0:
                     print("tp-11, fp-10, tn-00, fn-01")
                     print(" ", tp, "   ", fp, "   ", tn, "    ", fn)
-                    senseti = -1.0
-                    preci = -1.0
+                    Sensitivity = -1.0
+                    precisions = -1.0
                 else:
                     print("tp-11, fp-10, tn-00, fn-01")
                     print(" ", tp, "   ", fp, "   ",  tn, "    ",  fn)
-                    senseti = tp / (tp + fn)
-                    preci = tp / (tp + fp)
-                prec.append([n_steps_in, n_steps_out-1, senseti, preci, tp, fp, tn, fn])
-                ddf = ddf.append({'in': n_steps_in, 'out': n_steps_out-1, 'TP': tp, 'FP': fp, 'TN': tn, 'FN': fn}, ignore_index=True)
+
+                    Sensitivity = tp / (tp + fn)
+                    precisions = tp / (tp + fp)
+                Precision.append([n_steps_in, n_steps_out-1, Sensitivity, precisions, tp, fp, tn, fn])
+                df_LSTM_ROC = df_LSTM_ROC.append({'in': n_steps_in, 'out': n_steps_out-1, 'TP': tp, 'FP': fp, 'TN': tn, 'FN': fn}, ignore_index=True)
             else:
                 pass
-    ddf.to_csv('wb_lstm.csv')
-    plt.figure()
-    for i in range(len(prec)):
-        plt.bar(i+1, prec[i][2], label=f'senseti {prec[i][0]} -> {prec[i][1]}')
-        plt.bar(i+1, prec[i][3], label=f'preci {prec[i][0]} -> {prec[i][1]}')
-        plt.ylabel('')
-        plt.xlabel('epx')
-        plt.legend()
-        plt.tight_layout()
-        print(f'{prec[i][0]} -> {prec[i][1]}')
-        print('senseti -- prec -- tp fp tn fn')
-        print(prec[i][:])
-    plt.show()
+    df_LSTM_ROC.to_csv('wb_lstm.csv')
+
+    # plt.show()
 
 
 def stat_nn():
@@ -323,5 +283,5 @@ def makeShifts(data, n):
 if __name__ == '__main__':
     # startML()
     # stat_nn()
-    # start_lstm_1()
-    start_lstm_2()
+    start_lstm()
+    # start_lstm_2()
