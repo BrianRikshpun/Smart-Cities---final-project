@@ -1,11 +1,12 @@
 import pandas as pd
+import numpy as np
 from numpy import array, hstack
 import tensorflow as tf
 import torch
 from keras.models import Sequential
 # from tensorflow import keras
 # from tensorflow.keras import layers
-from keras.layers import LSTM, Dense, RepeatVector, TimeDistributed
+from keras.layers import LSTM, Dense, RepeatVector, TimeDistributed, Dropout
 import matplotlib.pyplot as plt
 import math
 from sklearn.preprocessing import MinMaxScaler
@@ -13,7 +14,7 @@ from pandas import Series
 from tensorflow.keras.optimizers import SGD, Adam, Adamax, Adadelta, Adagrad
 
 
-class LSTM_Model:
+class LSTM_M:
     def __init__(self, n_steps_in, n_steps_out):
         self.n_steps_in = n_steps_in
         self.n_steps_out = n_steps_out
@@ -214,3 +215,81 @@ class LSTM_Model:
         y_tv = y[:s]
 
         return x_trin, x_val, x_test, y_trin, y_val, y_test, X_tv, y_tv
+
+
+class LSTM_model:
+
+    def model(self, X_train, number_units, dropout_fraction):
+        model = Sequential()
+        # Layer 1
+        model.add(LSTM(
+            units=number_units,
+            return_sequences=True,
+            input_shape=(X_train.shape[1], 1))
+        )
+        model.add(Dropout(dropout_fraction))
+        # Layer 2
+        model.add(LSTM(units=number_units, return_sequences=True))
+        model.add(Dropout(dropout_fraction))
+        # Layer 3
+        model.add(LSTM(units=number_units))
+        model.add(Dropout(dropout_fraction))
+        # Output layer
+        model.add(Dense(1))
+        # Compile the model
+        optimize = tf.keras.optimizers.Adam(learning_rate=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-07)
+
+        model.compile(optimizer=optimize, loss="mean_squared_error", metrics=['acc'])
+        return model
+
+    # This function accepts the column number for the features (X) and the target (y)
+    # It chunks the data up with a rolling window of Xt-n to predict Xt
+    # It returns a numpy array of X any y
+    def window_data(self, df, window, feature_col_number, target_col_number):
+        X = []
+        y = []
+        for i in range(len(df) - window - 1):
+            features = df.iloc[i:(i + window), 0:feature_col_number]
+            target = df.iloc[(i + window), target_col_number]
+            X.append(features)
+            y.append(target)
+        return np.array(X), np.array(y).reshape(-1, 1)
+
+    def scaler_func(self, X, y, X_train, X_test, y_train, y_test):
+        # Use the MinMaxScaler to scale data between 0 and 1.
+        scaler = MinMaxScaler()
+        scaler.fit(X.reshape(X.shape[0], X.shape[1] * X.shape[2]))
+        X_train = scaler.transform(X_train.reshape(X_train.shape[0], X_train.shape[1] * X_train.shape[2]))
+        X_test = scaler.transform(X_test.reshape(X_test.shape[0], X_test.shape[1] * X_test.shape[2]))
+        scaler.fit(y)
+        y_train = scaler.transform(y_train)
+        y_test = scaler.transform(y_test)
+        return X_train, X_test, y_train, y_test, scaler
+
+    def prep_df(self, csv_path):
+        # Load the fear and greed sentiment data for Bitcoin
+        df1 = pd.read_csv(csv_path, index_col="Measurement Date", infer_datetime_format=True, parse_dates=True)['Water Temperature'].sort_index()
+        df2 = pd.read_csv(csv_path, index_col="Measurement Date", infer_datetime_format=True, parse_dates=True)['Latitude'].sort_index()
+        df3 = pd.read_csv(csv_path, index_col="Measurement Date", infer_datetime_format=True, parse_dates=True)['Wave Height'].sort_index()
+        df4 = pd.read_csv(csv_path, index_col="Measurement Date", infer_datetime_format=True, parse_dates=True)['Wave Period'].sort_index()
+        df5 = pd.read_csv(csv_path, index_col="Measurement Date", infer_datetime_format=True, parse_dates=True)['Battery Life'].sort_index()
+        # df6 = pd.read_csv(csv_path, index_col="Measurement Date", infer_datetime_format=True, parse_dates=True)['Measurement Day'].sort_index()
+        # df8 = pd.read_csv(csv_path, index_col="Measurement Date", infer_datetime_format=True, parse_dates=True)['Measurement Month'].sort_index()
+        # df9 = pd.read_csv(csv_path, index_col="Measurement Date", infer_datetime_format=True, parse_dates=True)['Measurement Year'].sort_index()
+        df10 = pd.read_csv(csv_path, index_col="Measurement Date", infer_datetime_format=True, parse_dates=True)['Measurement Hour'].sort_index()
+        df11 = pd.read_csv(csv_path, index_col="Measurement Date", infer_datetime_format=True, parse_dates=True)['class'].sort_index()
+        df_t = pd.read_csv(csv_path, index_col="Measurement Date", infer_datetime_format=True, parse_dates=True)['Turbidity'].sort_index()
+
+        # Join the data into a single DataFrame
+        df = df1.to_frame().join(df2, how="inner")
+        df = df.join(df3, how='inner')
+        df = df.join(df4, how='inner')
+        # df = df.join(df4, how='inner')
+        df = df.join(df5, how='inner')
+        # df = df.join(df6, how='inner')
+        # df = df.join(df8, how='inner')
+        # df = df.join(df9, how='inner')
+        df = df.join(df10, how='inner')
+        df = df.join(df11, how='inner')
+        df = df.join(df_t, how='inner')
+        return df

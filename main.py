@@ -7,9 +7,8 @@ from ClassicModels import ClassicModels
 from Visualization import Visualization
 from Data_Loader import prep_data_loder
 from nn_b_c import set_model
-from LSTM import LSTM_Model
+from LSTM import LSTM_model, LSTM_M
 from sklearn.linear_model import LogisticRegression
-# from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
@@ -18,7 +17,65 @@ import math
 from sklearn.metrics import confusion_matrix, classification_report
 
 
-def start_lstm():
+def start_lstm_2():
+    # Predict Closing Prices using a 10 day window of previous closing prices
+    # Then, experiment with window sizes anywhere from 1 to 10 and see how the model performance changes
+    window_size = 14
+
+    feature_column = 6
+    target_column = 7
+    number_units = 30
+    dropout_fraction = 0.5
+    epochs = 10
+
+    lstm = LSTM_model()
+    df = lstm.prep_df(csv_path="WB_0.csv")
+
+    X, y = lstm.window_data(df, window_size, feature_column, target_column)
+    # Use 70% of the data for training and the remaineder for testing
+    split = int(0.7 * len(X))
+    X_train = X[: split]
+    X_test = X[split:]
+    y_train = y[: split]
+    y_test = y[split:]
+
+    X_train, X_test, y_train, y_test, scaler = lstm.scaler_func(X, y, X_train, X_test, y_train, y_test)
+    # Reshape the features for the model
+    X_train = X_train.reshape((X_train.shape[0], X_train.shape[1], 1))
+    X_test = X_test.reshape((X_test.shape[0], X_test.shape[1], 1))
+
+    model = lstm.model(X_train, number_units, dropout_fraction)
+
+    history = model.fit(X_train, y_train, epochs=epochs, shuffle=False, batch_size=1, validation_data=(X_test, y_test), verbose=1)
+
+    # Evaluate the model
+    model.evaluate(X_test, y_test)
+
+    # Make some predictions
+    predicted = model.predict(X_test)
+    # Recover the original prices instead of the scaled version
+    predicted_Turbidity = scaler.inverse_transform(predicted)
+    real_Turbidity = scaler.inverse_transform(y_test.reshape(-1, 1))
+
+    plt.figure()
+    # Create a DataFrame of Real and Predicted values
+    Turbidity = pd.DataFrame({
+        "Real": real_Turbidity.ravel(),
+        "Predicted": predicted_Turbidity.ravel()},
+        index=df.index[-len(real_Turbidity):])
+    Turbidity.plot(title="Turbidity Real vs. Predicted", figsize=(10, 5))
+
+    plt.plot(history.history['loss'], label='train')
+    plt.plot(history.history['val_loss'], label='test')
+    plt.title('model loss adam')
+    plt.ylabel('loss')
+    plt.xlabel('epoch')
+    plt.legend()
+
+    plt.show()
+
+
+def start_lstm_1():
 
     n_steps_in_r = 8
     n_steps_out_r = 5
@@ -46,7 +103,7 @@ def start_lstm():
     for n_steps_out in range(2, n_steps_out_r+1):
         for n_steps_in in range(2, n_steps_in_r+1):
             if n_steps_in >= n_steps_out:
-                lstm = LSTM_Model(n_steps_in=n_steps_in, n_steps_out=n_steps_out)
+                lstm = LSTM_M(n_steps_in=n_steps_in, n_steps_out=n_steps_out)
                 x_trin, x_val, x_test, y_trin, y_val, y_test, X_tv, y_tv, n_features, scaler_0 = lstm.prep_data()
                 model, optimizers = lstm.load_model(n_features=n_features)
                 model.compile(optimizer=optimizers, loss='mean_squared_error', metrics=['accuracy', 'mse'])
@@ -267,4 +324,5 @@ def makeShifts(data, n):
 if __name__ == '__main__':
     # startML()
     # stat_nn()
-    start_lstm()
+    # start_lstm_1()
+    start_lstm_2()
